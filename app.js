@@ -1,3 +1,4 @@
+require('dotenv').config()  /*We required dotenv*/
 const express=require("express");
 const bodyParser=require("body-parser");
 const mongoose=require("mongoose");
@@ -16,10 +17,7 @@ const userSchema=new mongoose.Schema({
     password:String
 })
 
-/************************************This is the new part !****************************************************/
-
-const secret="ThisIsOurLittleSecret";  /*The key*/
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password']});
+userSchema.plugin(encrypt, { secret:process.env.SECRET , encryptedFields: ['password']}); /* We added process.env.SECRET here for accessing secret variable*/
 const User=mongoose.model("User",userSchema);
 
 app.listen("3000",function(){
