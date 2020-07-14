@@ -1,10 +1,9 @@
-require('dotenv').config()  /*We required dotenv*/
+const md5 = require('md5');
 const express=require("express");
 const bodyParser=require("body-parser");
 const mongoose=require("mongoose");
 const app=express();
 const ejs=require("ejs");
-const encrypt = require("mongoose-encryption");
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine",'ejs');
@@ -17,7 +16,9 @@ const userSchema=new mongoose.Schema({
     password:String
 })
 
-userSchema.plugin(encrypt, { secret:process.env.SECRET , encryptedFields: ['password']}); /* We added process.env.SECRET here for accessing secret variable*/
+/* We deleted process.env.SECRET and mongoose-encryption as well as dotenv modules***************/
+/*Because we no longer need them as we are saving the password directly using hash password */
+/* Also while checking we are using the has function i.e. converting req.body.password into hash first and the checking it */
 const User=mongoose.model("User",userSchema);
 
 app.listen("3000",function(){
@@ -44,7 +45,7 @@ app.post("/login",function(req,res){
         }
         else{
             if(foundUser){
-                if(foundUser.password===req.body.password){
+                if(foundUser.password===md5(req.body.password)){
                     res.render("secrets");
                 }
                 else{
@@ -57,7 +58,7 @@ app.post("/login",function(req,res){
 app.post("/register",function(req,res){
     const userNew=new User({
         email:req.body.username,
-        password:req.body.password
+        password:md5(req.body.password)
     })
     userNew.save(function(err){
         if(!err){
